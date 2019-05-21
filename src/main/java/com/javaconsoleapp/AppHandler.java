@@ -6,20 +6,23 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.ConfigEvent;
 import org.springframework.boot.SpringApplication;
 
+import java.util.Map;
+
 public class AppHandler
-        implements RequestHandler<ConfigEvent, String>{
+        implements RequestHandler<Map, String>{
 
     @Override
-    public String handleRequest(ConfigEvent event,
+    public String handleRequest(Map event,
                                 Context context) {
-        String logString = String.format("Rule Name %s parameters %s : %s",
-                event.getConfigRuleName(), event.getRuleParameters(), event.toString());
-        context.getLogger().log(logString);
-
         SpringApplication.run(SpringBootAwsLambdaApplication.class);
         LambdaLogger logger = context.getLogger();
-        logger.log("This works");
-
-        return "Scheduled handler returns: " + logString + " " + event.toString() + " " + context.toString();
+        if(event.containsKey("args")) {
+            String args = event.get("args").toString();
+            String logString = String.format("Args is %s", args);
+            logger.log(logString);
+        }
+        logger.log("All Parameters and data");
+        context.getLogger().log(event.toString());
+        return "Scheduled handler returns:  " + event.toString();
     }
 }
